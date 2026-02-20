@@ -1,0 +1,8 @@
+.expo
+node_modules
+*.sh
+.gemini
+.build
+.swiftpm
+*.bak
+android
