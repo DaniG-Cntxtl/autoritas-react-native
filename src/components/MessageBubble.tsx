@@ -48,7 +48,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ text, isUser, isFi
       ]}>
         <Text style={[
             styles.text,
-            { color: isUser ? '#fff' : '#334155' },
+            { color: isUser ? '#fff' : colors.text },
             !isFinal && styles.interimText
         ]}>
             {text}

@@ -46,7 +46,7 @@ export const GeometricMessageBubble: React.FC<GeometricMessageBubbleProps> = ({ 
       ]}>
         <Text style={[
             styles.text,
-            { color: isUser ? '#fff' : '#334155' },
+            { color: isUser ? '#fff' : colors.text },
             !isFinal && styles.interimText
         ]}>
             {text}

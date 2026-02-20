@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { View, Text, TextInput, StyleSheet, KeyboardAvoidingView, Platform, Pressable } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -8,7 +8,12 @@ import { useChat } from '../context/ChatContext';
 import { ActionButtons } from './widgets/ActionButtons';
 import { DeviceGrid } from './widgets/DeviceGrid';
 import { PlanCard } from './widgets/PlanCard';
+import { PlanGrid } from './widgets/PlanGrid';
 import { InvoiceSummary } from './widgets/InvoiceSummary';
+import { RouterDiagnostics } from './widgets/RouterDiagnostics';
+import { DocumentPreview } from './widgets/DocumentPreview';
+import { TelemetryDashboard } from './widgets/TelemetryDashboard';
+import { WelcomeMenu } from './widgets/WelcomeMenu';
 import { MessageBubble } from './MessageBubble';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -18,6 +23,7 @@ export const ChatInterface = () => {
   const { colors, layout, typography } = theme.styles;
   const [inputText, setInputText] = useState('');
   const insets = useSafeAreaInsets();
+  const listRef = useRef<any>(null);
 
   const handleSend = useCallback(() => {
     console.log('[ChatInterface] handleSend triggered', inputText);
@@ -78,11 +84,50 @@ export const ChatInterface = () => {
               onAction={(actionId) => handleWidgetAction(msg.id, actionId)}
             />
           )}
+          {msg.widget === 'plan_grid' && (
+            <PlanGrid
+              data={msg.data}
+              actions={msg.actions}
+              selectedActionId={msg.selectedActionId}
+              agentMessage={msg.agentMessage}
+              onAction={(actionId, plan) => handleWidgetAction(msg.id, actionId, plan)}
+            />
+          )}
           {msg.widget === 'invoice_summary' && (
             <InvoiceSummary
               data={msg.data}
               actions={msg.actions}
               agentMessage={msg.agentMessage}
+              onAction={(actionId) => handleWidgetAction(msg.id, actionId)}
+            />
+          )}
+          {msg.widget === 'router_diagnostics' && (
+            <RouterDiagnostics
+              data={msg.data}
+              actions={msg.actions}
+              agentMessage={msg.agentMessage}
+              onAction={(actionId) => handleWidgetAction(msg.id, actionId)}
+            />
+          )}
+          {msg.widget === 'document_preview' && (
+            <DocumentPreview
+              data={msg.data}
+              actions={msg.actions}
+              agentMessage={msg.agentMessage}
+              onAction={(actionId) => handleWidgetAction(msg.id, actionId)}
+            />
+          )}
+          {msg.widget === 'telemetry_dashboard' && (
+            <TelemetryDashboard
+              data={msg.data}
+              actions={msg.actions}
+              agentMessage={msg.agentMessage}
+              onAction={(actionId) => handleWidgetAction(msg.id, actionId)}
+            />
+          )}
+          {msg.widget === 'welcome_menu' && (
+            <WelcomeMenu
+              data={msg.data}
               onAction={(actionId) => handleWidgetAction(msg.id, actionId)}
             />
           )}
@@ -114,6 +159,7 @@ export const ChatInterface = () => {
             </View>
             ) : (
             <FlashList
+                ref={listRef}
                 data={messages}
                 renderItem={renderItem}
                 keyExtractor={keyExtractor}
@@ -122,6 +168,16 @@ export const ChatInterface = () => {
                 contentContainerStyle={styles.messagesContent}
                 showsVerticalScrollIndicator={false}
                 keyboardDismissMode="on-drag"
+                onContentSizeChange={() => {
+                  if (messages.length > 0) {
+                    listRef.current?.scrollToEnd({ animated: true });
+                  }
+                }}
+                onLayout={() => {
+                  if (messages.length > 0) {
+                    listRef.current?.scrollToEnd({ animated: true });
+                  }
+                }}
             />
             )}
         </View>
