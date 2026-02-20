@@ -44,6 +44,15 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "plugins": []
+    "newArchEnabled": false,
+    "plugins": [
+      [
+        "@livekit/react-native",
+        {
+          "cameraPermission": "Camera permission is required for video conferencing",
+          "microphonePermission": "Microphone permission is required for audio conferencing"
+        }
+      ]
+    ]
   }
 }
