@@ -1,47 +1,32 @@
 import SwiftUI
 
 struct ActionButtons: View {
-    let message: Message
+    let data: [String: Any]
+    let actions: [WidgetAction]
+    let agentMessage: String?
+    let selectedActionId: String?
+    let themeVM: ThemeViewModel
     let onAction: (String) -> Void
-    
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            if let agentMessage = message.widgetData?.agentMessage {
-                Text(agentMessage)
-                    .font(.body)
-                    .foregroundColor(.white)
-                    .padding(.horizontal)
+        VStack(alignment: .leading, spacing: 8) {
+            if let title = data["title"] as? String {
+                Text(title)
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundColor(themeVM.secondaryTextColor)
+                    .padding(.horizontal, 16)
+                    .padding(.top, 12)
             }
-            
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 12) {
-                    if let actions = message.actions {
-                        ForEach(actions) { action in
-                            Button(action: {
-                                onAction(action.id)
-                            }) {
-                                Text(action.label)
-                                    .font(.system(size: 14, weight: .semibold))
-                                    .foregroundColor(message.selectedActionId == action.id ? .white : .indigo)
-                                    .padding(.horizontal, 16)
-                                    .padding(.vertical, 10)
-                                    .background(
-                                        message.selectedActionId == action.id 
-                                            ? Color.indigo 
-                                            : Color.indigo.opacity(0.1)
-                                    )
-                                    .cornerRadius(20)
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 20)
-                                            .stroke(Color.indigo.opacity(0.3), lineWidth: 1)
-                                    )
-                            }
-                        }
-                    }
-                }
-                .padding(.horizontal)
-                .padding(.vertical, 8)
+            if let msg = agentMessage {
+                WidgetAgentMessage(text: msg, themeVM: themeVM)
+            }
+            if !actions.isEmpty {
+                WidgetActionButtons(actions: actions, selectedActionId: selectedActionId,
+                                    themeVM: themeVM, onAction: onAction)
+                    .padding(.bottom, 8)
             }
         }
+        .widgetCard(themeVM: themeVM)
+        .padding(.horizontal, 16)
     }
 }

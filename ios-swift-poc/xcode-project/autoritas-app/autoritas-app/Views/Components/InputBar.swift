@@ -2,51 +2,39 @@ import SwiftUI
 
 struct InputBar: View {
     @Binding var text: String
+    let themeVM: ThemeViewModel
     let onSend: () -> Void
-    
+
     var body: some View {
-        VStack(spacing: 0) {
-            HStack(spacing: 12) {
-                HStack {
-                    TextField("iMessage", text: $text)
-                        .textFieldStyle(PlainTextFieldStyle())
-                        .foregroundColor(.white)
-                        .font(.system(size: 16))
-                        .padding(.horizontal, 12)
-                        .frame(height: 40)
-                    
-                    if !text.isEmpty {
-                        Button(action: { text = "" }) {
-                            Image(systemName: "xmark.circle.fill")
-                                .foregroundColor(.white.opacity(0.4))
-                        }
-                        .padding(.trailing, 8)
-                    }
-                }
-                .background(Color.white.opacity(0.15))
-                .cornerRadius(20)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 20)
-                        .stroke(Color.white.opacity(0.1), lineWidth: 1)
-                )
-                
-                Button(action: onSend) {
-                    Image(systemName: "arrow.up")
-                        .font(.system(size: 18, weight: .black))
-                        .foregroundColor(.white)
-                        .frame(width: 36, height: 36)
-                        .background(Color(red: 0.19, green: 0.82, blue: 0.35)) // #30d158
-                        .clipShape(Circle())
-                        .scaleEffect(text.isEmpty ? 0.8 : 1.0)
-                        .opacity(text.isEmpty ? 0.5 : 1.0)
-                }
-                .disabled(text.isEmpty)
-                .animation(.spring(), value: text.isEmpty)
+        HStack(spacing: 12) {
+            TextField("Type a message...", text: $text, axis: .vertical)
+                .font(.system(size: 16))
+                .foregroundColor(themeVM.textColor)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
+                .background(themeVM.inputBgColor)
+                .clipShape(Capsule())
+                .overlay(Capsule().stroke(themeVM.accentColor, lineWidth: 1))
+                .lineLimit(1...4)
+                .onSubmit { onSend() }
+
+            Button(action: onSend) {
+                Image(systemName: "arrow.up")
+                    .font(.system(size: 16, weight: .bold))
+                    .foregroundColor(.white)
+                    .frame(width: 44, height: 44)
+                    .background(text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                        ? themeVM.primaryColor.opacity(0.4)
+                        : themeVM.primaryColor)
+                    .clipShape(Circle())
             }
-            .padding(.horizontal, 16)
-            .padding(.top, 10)
-            .padding(.bottom, 20)
-            .background(Color.clear)
+            .disabled(text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+            .animation(.easeInOut(duration: 0.15), value: text.isEmpty)
         }
+        .padding(.horizontal, 16)
+        .padding(.top, 12)
+        .padding(.bottom, 24)
+        .background(themeVM.cardBgColor)
+        .overlay(Divider().background(themeVM.accentColor), alignment: .top)
     }
 }

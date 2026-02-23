@@ -1,42 +1,34 @@
 import SwiftUI
 
-struct GeometricMessageBubble: View {
+struct MessageBubble: View {
     let message: Message
-    
-    var isUser: Bool {
-        return message.role == .user
-    }
-    
+    let themeVM: ThemeViewModel
+
+    private var isUser: Bool { message.role == .user }
+    private var isInterim: Bool { !message.isFinal }
+
     var body: some View {
-        HStack {
-            if isUser { Spacer() }
-            
-            VStack(alignment: isUser ? .trailing : .leading) {
-                if let text = message.text {
-                    Text(text)
-                        .font(.system(size: 16))
-                        .lineSpacing(4)
-                        .foregroundColor(.white)
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 10)
-                        .background(
-                            isUser ? Color.blue : Color.white.opacity(0.15)
-                        )
-                        .clipShape(
-                            UnevenRoundedRectangle(
-                                topLeadingRadius: 20,
-                                bottomLeadingRadius: isUser ? 20 : 4,
-                                bottomTrailingRadius: isUser ? 4 : 20,
-                                topTrailingRadius: 20
-                            )
-                        )
+        HStack(alignment: .bottom, spacing: 8) {
+            if isUser { Spacer(minLength: 60) }
+
+            VStack(alignment: isUser ? .trailing : .leading, spacing: 4) {
+                Text(message.text ?? "")
+                    .font(.system(size: 15))
+                    .foregroundColor(isUser ? .white : themeVM.textColor)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 10)
+                    .background(isUser ? themeVM.bubbleUserColor : themeVM.bubbleAgentColor)
+                    .cornerRadius(CGFloat(themeVM.borderRadius == 4 ? 18 : themeVM.borderRadius))
+                    .opacity(isInterim ? 0.6 : 1.0)
+
+                if isInterim {
+                    Text("…")
+                        .font(.caption2)
+                        .foregroundColor(themeVM.secondaryTextColor)
                 }
             }
-            .frame(maxWidth: 300, alignment: isUser ? .trailing : .leading)
-            
-            if !isUser { Spacer() }
+
+            if !isUser { Spacer(minLength: 60) }
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 4)
     }
 }

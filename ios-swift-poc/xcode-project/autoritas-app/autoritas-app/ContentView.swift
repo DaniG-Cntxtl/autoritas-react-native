@@ -1,26 +1,27 @@
 import SwiftUI
 
 struct ContentView: View {
-    @StateObject private var appState = AppState()
-    
-    init() {
-        print("DEBUG: ContentView init")
-    }
-    
+    @StateObject private var appState    = AppState()
+    @StateObject private var themeVM     = ThemeViewModel()
+    @StateObject private var sessionVM   = SessionViewModel()
+
     var body: some View {
-        let _ = print("DEBUG: ContentView body")
         Group {
             switch appState.currentScreen {
             case .login:
                 LoginView()
                     .environmentObject(appState)
+                    .environmentObject(themeVM)
             case .chat:
                 if let token = appState.token, let url = appState.url {
-                    ChatView(token: token, url: url)
+                    LiveSessionView(token: token, url: url)
                         .environmentObject(appState)
+                        .environmentObject(themeVM)
+                        .environmentObject(sessionVM)
                 } else {
                     LoginView()
                         .environmentObject(appState)
+                        .environmentObject(themeVM)
                 }
             }
         }

@@ -1,155 +1,117 @@
 import SwiftUI
 
 struct PlanCard: View {
-    let message: Message
+    let data: [String: Any]
+    let actions: [WidgetAction]
+    let agentMessage: String?
+    let themeVM: ThemeViewModel
     let onAction: (String) -> Void
-    
+
+    private var plan: PlanData? {
+        guard let jsonData = try? JSONSerialization.data(withJSONObject: data),
+              let p = try? JSONDecoder().decode(PlanData.self, from: jsonData) else { return nil }
+        return p
+    }
+
     var body: some View {
-        if let widgetData = message.widgetData, let data = widgetData.plan {
+        if let p = plan {
             ZStack(alignment: .top) {
-                // Background with Gradient and Border
                 LinearGradient(
-                    colors: [Color(red: 0.12, green: 0.12, blue: 0.25), Color(red: 0.09, green: 0.09, blue: 0.17)],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
+                    colors: [themeVM.primaryColor.opacity(0.15), themeVM.cardBgColor],
+                    startPoint: .topLeading, endPoint: .bottomTrailing
                 )
                 .cornerRadius(20)
                 .overlay(
                     RoundedRectangle(cornerRadius: 20)
-                        .stroke(data.highlighted == true ? Color.indigo : Color.indigo.opacity(0.2), lineWidth: 1)
+                        .stroke(p.highlighted == true ? themeVM.primaryColor : themeVM.accentColor,
+                                lineWidth: p.highlighted == true ? 2 : 1)
                 )
-                
-                // Highlight Top Border
-                if data.highlighted == true {
-                    LinearGradient(
-                        colors: [.indigo, .purple, .blue.opacity(0.5)],
-                        startPoint: .leading,
-                        endPoint: .trailing
-                    )
+
+                // Highlighted accent top bar
+                if p.highlighted == true {
+                    LinearGradient(colors: [themeVM.primaryColor, themeVM.primaryColor.opacity(0.6)],
+                                   startPoint: .leading, endPoint: .trailing)
                     .frame(height: 3)
-                    .clipShape(
-                        UnevenRoundedRectangle(topLeadingRadius: 20, topTrailingRadius: 20)
-                    )
+                    .clipShape(UnevenRoundedRectangle(topLeadingRadius: 20, topTrailingRadius: 20))
                 }
-                
-                VStack(spacing: 24) {
+
+                VStack(spacing: 20) {
                     // Badge
-                    if let badge = data.badge {
+                    if let badge = p.badge {
                         HStack {
                             Spacer()
                             Text(badge)
-                                .font(.caption2)
-                                .fontWeight(.bold)
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 4)
-                                .background(
-                                    LinearGradient(colors: [.orange, .yellow], startPoint: .leading, endPoint: .trailing)
-                                )
+                                .font(.system(size: 11, weight: .bold))
+                                .padding(.horizontal, 12).padding(.vertical, 4)
+                                .background(LinearGradient(colors: [.orange, .yellow], startPoint: .leading, endPoint: .trailing))
                                 .foregroundColor(.black)
                                 .cornerRadius(20)
                         }
                     }
-                    
-                    // Header
-                    VStack(spacing: 8) {
-                        Text(data.name)
-                            .font(.title2)
-                            .fontWeight(.bold)
-                            .foregroundColor(.white)
-                        
+
+                    // Name + Price
+                    VStack(spacing: 6) {
+                        Text(p.name)
+                            .font(.title2.bold())
+                            .foregroundColor(themeVM.textColor)
                         HStack(alignment: .firstTextBaseline, spacing: 4) {
-                            Text("€\(Int(data.price))")
+                            Text("€\(Int(p.price))")
                                 .font(.system(size: 40, weight: .black))
-                                .foregroundColor(.white)
-                            Text(data.period ?? "/mes")
+                                .foregroundColor(themeVM.textColor)
+                            Text(p.period ?? "/mes")
                                 .font(.subheadline)
-                                .foregroundColor(.white.opacity(0.6))
+                                .foregroundColor(themeVM.secondaryTextColor)
                         }
                     }
-                    
-                    // Highlights (GB, Minutes, SMS)
+
+                    // Data / Minutes / SMS highlights
                     HStack(spacing: 24) {
-                        if let gb = data.dataGb {
-                            HighlightItem(value: "\(gb)GB", label: "Datos")
+                        if let gb = p.dataGb {
+                            planHighlight(value: "\(gb)GB", label: "DATOS")
                         }
-                        if let mins = data.callsMinutes {
-                            HighlightItem(value: mins, label: "Minutos")
+                        if let mins = p.callsMinutes {
+                            planHighlight(value: mins.stringValue, label: "MINUTOS")
                         }
-                        if let sms = data.sms {
-                            HighlightItem(value: sms, label: "SMS")
+                        if let sms = p.sms {
+                            planHighlight(value: sms.stringValue, label: "SMS")
                         }
                     }
-                    .padding(16)
-                    .background(Color.indigo.opacity(0.1))
-                    .cornerRadius(12)
-                    
-                    // Features List
-                    VStack(alignment: .leading, spacing: 8) {
-                        ForEach(Array(data.features.enumerated()), id: \.offset) { _, feature in
-                            HStack(alignment: .top, spacing: 12) {
-                                Text("✓")
-                                    .fontWeight(.bold)
-                                    .foregroundColor(.green)
-                                Text(feature)
-                                    .font(.footnote)
-                                    .foregroundColor(.white.opacity(0.9))
+                    .padding(14)
+                    .background(themeVM.primaryColor.opacity(0.08))
+                    .cornerRadius(10)
+
+                    // Features
+                    if let features = p.features {
+                        VStack(alignment: .leading, spacing: 8) {
+                            ForEach(features, id: \.self) { f in
+                                Label(f, systemImage: "checkmark")
+                                    .font(.system(size: 13))
+                                    .foregroundColor(themeVM.textColor)
+                                    .labelStyle(.titleAndIcon)
                             }
                         }
+                        .frame(maxWidth: .infinity, alignment: .leading)
                     }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    
+
                     // Actions
-                    if let actions = message.actions {
-                        HStack(spacing: 12) {
-                            ForEach(actions) { action in
-                                Button(action: {
-                                    onAction(action.id)
-                                }) {
-                                    Text(action.label)
-                                        .font(.system(size: 15, weight: .semibold))
-                                        .padding(.vertical, 14)
-                                        .frame(maxWidth: .infinity)
-                                        .background(
-                                            Group {
-                                                if action.style == .primary {
-                                                    LinearGradient(colors: [.indigo, .purple], startPoint: .leading, endPoint: .trailing)
-                                                } else {
-                                                    Color.white.opacity(0.1)
-                                                }
-                                            }
-                                        )
-                                        .foregroundColor(.white)
-                                        .cornerRadius(12)
-                                        .overlay(
-                                            RoundedRectangle(cornerRadius: 12)
-                                                .stroke(action.style == .secondary ? Color.white.opacity(0.2) : Color.clear, lineWidth: 1)
-                                        )
-                                }
-                                .disabled(action.disabled == true)
-                            }
-                        }
-                    }
+                    WidgetActionButtons(actions: actions, selectedActionId: nil,
+                                        themeVM: themeVM, onAction: onAction)
+                        .padding(.horizontal, -16)
                 }
                 .padding(24)
             }
-            .padding(.vertical, 8)
+            .padding(.horizontal, 16)
+
+            if let msg = agentMessage {
+                WidgetAgentMessage(text: msg, themeVM: themeVM)
+            }
         }
     }
-}
 
-struct HighlightItem: View {
-    let value: String
-    let label: String
-    
-    var body: some View {
+    private func planHighlight(value: String, label: String) -> some View {
         VStack(spacing: 4) {
-            Text(value)
-                .font(.headline)
-                .fontWeight(.bold)
-                .foregroundColor(.indigo)
-            Text(label.uppercased())
-                .font(.system(size: 10))
-                .foregroundColor(.white.opacity(0.6))
+            Text(value).font(.system(size: 15, weight: .bold)).foregroundColor(themeVM.primaryColor)
+            Text(label).font(.system(size: 9, weight: .semibold)).foregroundColor(themeVM.secondaryTextColor)
         }
     }
 }
