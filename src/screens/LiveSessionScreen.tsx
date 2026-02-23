@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, Text, TouchableOpacity, StatusBar } from 'react-native';
+import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
+import { View, StyleSheet, Text, TouchableOpacity, StatusBar, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRoomContext } from '../lkm';
 import { RoomEvent, DataPacket_Kind } from 'livekit-client';
@@ -105,7 +106,11 @@ const LiveSessionScreen = ({ onExit }: { onExit: () => void }) => {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.styles.colors.background }]}>
+    <KeyboardAvoidingView
+      style={[styles.container, { backgroundColor: theme.styles.colors.background }]}
+      behavior={'padding'}
+      keyboardVerticalOffset={0}
+    >
       <StatusBar barStyle={theme.meta.name.includes('Dark') ? "light-content" : "dark-content"} />
       <ThemeHandler />
       <ChatBridge />
@@ -127,7 +132,7 @@ const LiveSessionScreen = ({ onExit }: { onExit: () => void }) => {
 
         {renderFooter()}
       </SafeAreaView>
-    </View>
+    </KeyboardAvoidingView>
   );
 };
 

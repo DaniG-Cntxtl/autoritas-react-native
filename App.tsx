@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { StatusBar } from 'expo-status-bar';
 import { LiveKitRoom } from './src/lkm';
 import { AudioSession } from './src/lkm';
@@ -32,10 +33,11 @@ const AppContent = () => {
     try {
       // For POC, simulate fetching token immediately after login
       // In real app, might go to Home first, then join room
-      const randomUser = `user-${Math.floor(Math.random() * 1000)}`;
+      const randomUser = `user-${Math.floor(Math.random() * 10000)}`;
+      const randomRoom = `room-${Math.floor(Math.random() * 10000)}`;
       
       // Using 'test-room' for now, or could come from user selection
-      const { token, url } = await fetchLiveKitToken('test-room', randomUser);
+      const { token, url } = await fetchLiveKitToken(randomRoom, randomUser);
       
       console.log('[App] Received Auth:', { url, token: token.substring(0, 10) + '...' });
       
@@ -81,13 +83,15 @@ const AppContent = () => {
 export default function App() {
   return (
     <SafeAreaProvider>
-      <ThemeEngineProvider>
-        <SessionDataProvider>
-          <ChatProvider>
-            <AppContent />
-          </ChatProvider>
-        </SessionDataProvider>
-      </ThemeEngineProvider>
+      <KeyboardProvider>
+        <ThemeEngineProvider>
+          <SessionDataProvider>
+            <ChatProvider>
+              <AppContent />
+            </ChatProvider>
+          </SessionDataProvider>
+        </ThemeEngineProvider>
+      </KeyboardProvider>
     </SafeAreaProvider>
   );
 }

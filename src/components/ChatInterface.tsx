@@ -140,11 +140,7 @@ export const ChatInterface = () => {
   const keyExtractor = useCallback((item: any) => item.id, []);
 
   return (
-    <KeyboardAvoidingView 
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      style={styles.container}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
-    >
+    <View style={styles.container}>
       <View style={[styles.gradient, { backgroundColor: theme.styles.colors.background }]}>
         <View style={[styles.header, { backgroundColor: 'transparent', borderBottomWidth: 1, borderBottomColor: theme.styles.colors.accent }]}>
            <View style={styles.statusDot} />
@@ -187,7 +183,7 @@ export const ChatInterface = () => {
             { 
               backgroundColor: theme.styles.colors.cardBackground,
               borderTopColor: theme.styles.colors.accent,
-              paddingBottom: Math.max(insets.bottom, 20)
+              paddingBottom: Platform.OS === 'ios' ? Math.max(insets.bottom, 20) : Math.max(insets.bottom, 12)
             }
         ]}>
             <View style={[styles.textInputWrapper, { backgroundColor: theme.styles.colors.inputBackground, borderColor: theme.styles.colors.accent }]}>
@@ -216,7 +212,7 @@ export const ChatInterface = () => {
             </Pressable>
         </View>
       </View>
-    </KeyboardAvoidingView>
+    </View>
   );
 };
 
