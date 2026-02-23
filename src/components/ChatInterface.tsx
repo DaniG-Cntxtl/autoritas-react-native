@@ -141,7 +141,7 @@ export const ChatInterface = () => {
 
   return (
     <KeyboardAvoidingView 
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       style={styles.container}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
     >
@@ -187,7 +187,7 @@ export const ChatInterface = () => {
             { 
               backgroundColor: theme.styles.colors.cardBackground,
               borderTopColor: theme.styles.colors.accent,
-              paddingBottom: Platform.OS === 'ios' ? Math.max(insets.bottom, 20) : 20
+              paddingBottom: Math.max(insets.bottom, 20)
             }
         ]}>
             <View style={[styles.textInputWrapper, { backgroundColor: theme.styles.colors.inputBackground, borderColor: theme.styles.colors.accent }]}>
