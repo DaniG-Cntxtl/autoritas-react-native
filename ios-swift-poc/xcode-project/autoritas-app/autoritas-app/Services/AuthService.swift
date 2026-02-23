@@ -13,7 +13,7 @@ class AuthService: ObservableObject, @unchecked Sendable {
     @Published var url: String?
     
     func fetchLiveKitToken(roomName: String, participantName: String) async throws -> LiveKitAuthResponse {
-        guard let url = URL(string: "https://agent.autoritas.ai/livekit/token") else {
+        guard let url = URL(string: "https://agent.artemisa-hb.cloud/livekit/token") else {
             throw AuthError.invalidURL
         }
         
@@ -41,7 +41,7 @@ class AuthService: ObservableObject, @unchecked Sendable {
         } else if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
                   let token = json["token"] as? String {
              // Fallback for different response format if any
-             let url = json["url"] as? String ?? "wss://agent.autoritas.ai"
+             let url = json["url"] as? String ?? "wss://agent.artemisa-hb.cloud"
              print("DEBUG: Auth URL (fallback): \(url)")
              return LiveKitAuthResponse(token: token, url: url)
         }
